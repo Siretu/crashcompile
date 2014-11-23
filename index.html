@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Crash and Compile</title>
+    <style type="text/css" media="screen">
+      #editor { 
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      }
+
+    #editor_resize {
+        resize: vertical;
+        overflow: hidden;
+        padding-bottom: 10px;
+        border: 1px solid black;
+    }
+
+    .editor_wrapper {
+        position:relative;
+        height: 300px;
+        resize: none;
+    }
+    </style>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+
+    <link rel="stylesheet" href="./css/basic_style.css">
+
+  </head>
+  <body>
+    <div id="wrapper">
+      <header class="header">
+	<a href="http://www.nada.kth.se/~eihren/crashcompile/" class="logo-kattis">
+          <div class="img"></div>
+          <div class="bg"></div>
+      </a></header>
+      
+      <div class="wrap">
+	<div class="page-content single clearfix">
+	  <div class="page-headline clearfix">
+	    <div class="f1">
+	      Crash and Compile
+	    </div>
+	  </div>
+	  <div class="row">
+	    <div class="span12">
+	      <div class="span2"></div>
+	      <div class="col-md-12">
+		<div id='editor_resize' style='display:block'>
+		  <div class='editor_wrapper' id='editor' style='display:block'>
+		    <div id="editor">function foo(items) {
+		      var x = "All this is syntax highlighted";
+		      return x;
+		      }</div>
+		  </div>
+		</div>
+		<div class="span2">Foo</div>
+		<div class="span1"></div>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+      </div>
+    </div>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/ace/1.1.3/ace.js" type='text/javascript' charset='utf-8'></script>
+    <script>
+      var editor = ace.edit("editor");
+      editor.setTheme("ace/theme/textmate");
+      editor.getSession().setMode("ace/mode/javascript");
+    </script>
+  </body>
+</html>
