@@ -2,8 +2,19 @@
 <html lang="en">
   <head>
     <title>Crash and Compile</title>
+    <script type='text/javascript'>
+      var nrTests = 0;
+    </script>
     <style type="text/css" media="screen">
       #editor { 
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      }
+
+      #result { 
       position: absolute;
       top: 0;
       right: 0;
@@ -39,6 +50,8 @@
     <link rel="stylesheet" href="./css/basic_style.css">
     <link rel="stylesheet" href="./css/custom_style.css">
 
+    <script src="./crashcompile.js" type='text/javascript' charset='utf-8'></script>
+
   </head>
   <body>
     <div id="wrapper">
@@ -59,11 +72,18 @@
 	    <div class="span12">
 	      <div class="span2"></div>
 	      <div class="col-md-12">
-		<div id='editor_resize' style='display:block'>
-		  <div class='editor_wrapper' id='editor' style='display:block'><div id="editor"></div></div>
+		<div id='editor_resize' style='display:block; height: 310px'>
+		  <div class='editor_wrapper' id='editor_box' style='display:block'>
+		    <div id="editor" class=" ace_editor ace-tm"></div>
+		  </div>
+		  
 		</div>
-		<div class="span2">Foo</div>
-		<div class="span1"></div>
+		<div class="span5">Foo</div>
+		<div id='editor_resize' style='display:block; height: 310px'>
+		  <div class='editor_wrapper' id='result_box' style='display:block'>
+		    <div id="result" class=" ace_editor ace-tm"></div>
+		  </div>
+		</div>
 	      </div>
 	    </div>
 	  </div>

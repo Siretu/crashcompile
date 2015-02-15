@@ -1,22 +1,58 @@
-saveFile = function() {
-    var contents = editor.getSession().getValue();
-    
-    $.post("compile.php",
-	   {contents: contents},
+function loadResult () {
+    console.log("Loading");
+    // add error checking ?
+    $.get("inc/read_result.php",
+	  function (data) {
+	      result.setValue(data,1);
+	  });
+};
+
+function runCode (callback) {
+    console.log("Running");
+    // Add some kind of hashing to see if it has changed since last save?
+    $.post("inc/run_code.php",
+	   {id: readCookie("session")},
 	   function(data) {
-	       // add error checking
-	       alert('successful save: ' + data);
-	       $.get("read_result.php",
-		     function (data2) {
-			 alert("Got result: " + data2);
-		     }
-		    );
+	       console.log(data);
+	       callback();
 	   }
+	  );
+    
+};
+
+function testCode (callback) {
+    console.log("Testing");
+    // Add some kind of hashing to see if it has changed since last save?
+    $.post("inc/test_code.php",
+	   {id: readCookie("session")},
+	   function(data) {
+	       console.log(data);
+	       callback();
+	   }
+	  );
+    
+};
+
+function saveFile(callback) {
+    console.log("Saving");
+    var contents = editor.getSession().getValue();
+    $.post("inc/compile.php",
+	   {contents: contents,
+	    id: readCookie("session")},
+	   callback
 	  );
 };
 
 
 var editor = ace.edit("editor");
+var editor_div = document.getElementById('editor');
+var doc = editor.getSession().getDocument()
+
+editor.on('change', function() {
+    // assuming a line height of 16 pixels
+    editor_div.style.height = 16 * doc.getLength() + 'px';
+    editor.resize();
+});
 editor.setTheme("ace/theme/textmate");
 editor.getSession().setMode("ace/mode/python");
 editor.commands.addCommand({
@@ -27,6 +63,23 @@ editor.commands.addCommand({
 	sender: "editor|cli"
     },
     exec: function() {
-	saveFile();
+	saveFile(runCode(loadResult));
     }
 });
+editor.commands.addCommand({
+    name: "test",
+    bindKey: {
+	win: "Ctrl-D",
+	mac: "Command-D",
+	sender: "editor|cli"
+    },
+    exec: function() {
+	saveFile(testCode(loadResult));
+    }
+});
+
+
+var result = ace.edit("result");
+result.setTheme("ace/theme/terminal");
+result.getSession().setMode("ace/mode/python");
+result.setReadOnly(true);

@@ -1,4 +1,1 @@
-import os
-
-f = os.popen("less /etc/passwd")
-print f.read()
+print "ccc"

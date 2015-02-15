@@ -5,6 +5,6 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get -y update
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get -y install python python-pip
 
-VOLUME /student.py
+VOLUME ["/student.py","/test.txt"]
 
-CMD ["python","/student.py"]
+CMD cat /test.txt | python /student.py
