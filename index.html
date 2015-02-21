@@ -34,6 +34,21 @@
         height: 300px;
         resize: none;
     }
+
+      .glyphicon-refresh-animate {
+      -animation: spin .7s infinite linear;
+      -webkit-animation: spin2 .7s infinite linear;
+      }
+      
+      @-webkit-keyframes spin2 {
+      from { -webkit-transform: rotate(0deg);}
+      to { -webkit-transform: rotate(360deg);}
+      }
+      
+      @keyframes spin {
+      from { transform: scale(1) rotate(0deg);}
+      to { transform: scale(1) rotate(360deg);}
+      }
     </style>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
     <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
@@ -56,33 +71,42 @@
   <body>
     <div id="wrapper">
       <header class="header">
-	<a href="http://www.nada.kth.se/~eihren/crashcompile/" class="logo-kattis">
+	<!--<a href="http://www.nada.kth.se/~eihren/crashcompile/" class="logo-kattis">
           <div class="img"></div>
           <div class="bg"></div>
-      </a></header>
+	</a>-->
+	<div class="wrap">
+	  <div class="app-side f1">
+	    <nav class="main-nav">
+	      Foobar
+	      <ul>
+		<li class="current"><a href="#"><h4>Crash and Compile</h4></a></li>
+	      </ul>
+	    </nav>
+	  </div>
+	</div>
+	
+      </header>
+
       
       <div class="wrap">
-	<div class="page-content single clearfix">
-	  <div class="page-headline clearfix">
-	    <div class="f1">
-	      Crash and Compile
-	    </div>
-	  </div>
+	<div class="page-content clearfix">
 	  <div class="row">
-	    <div class="span12">
-	      <div class="span2"></div>
-	      <div class="col-md-12">
-		<div id='editor_resize' style='display:block; height: 310px'>
-		  <div class='editor_wrapper' id='editor_box' style='display:block'>
-		    <div id="editor" class=" ace_editor ace-tm"></div>
-		  </div>
-		  
+	    <div class="col-md-3">
+	      <h1><small>Tests</small></h1>
+	      <ul class="list-group" id="test-list">
+	      </ul>
+	    </div>
+	    <div class="col-md-9">
+	      <div id='editor_resize' style='display:block; height: 310px'>
+		<div class='editor_wrapper' id='editor_box' style='display:block'>
+		  <div id="editor" class=" ace_editor ace-tm"></div>
 		</div>
-		<div class="span5">Foo</div>
-		<div id='editor_resize' style='display:block; height: 310px'>
-		  <div class='editor_wrapper' id='result_box' style='display:block'>
-		    <div id="result" class=" ace_editor ace-tm"></div>
-		  </div>
+		
+	      </div>
+	      <div id='editor_resize' style='display:block; height: 310px'>
+		<div class='editor_wrapper' id='result_box' style='display:block'>
+		  <div id="result" class=" ace_editor ace-tm"></div>
 		</div>
 	      </div>
 	    </div>

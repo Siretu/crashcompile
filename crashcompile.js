@@ -36,14 +36,24 @@ function readCookie(name) {
     return '';
 }
 
+function updateTestList() {
+    var root = $("#test-list");
+    console.log(root);
+    console.log(nrTests);
+    for (var i = 0; i < nrTests; i++) {
+	var item = '<li class="list-group-item test" >Test ' + (i+1) + '<span class="glyphicon pull-right"></span></li>';
+	console.log("added item");
+	root.append(item);
+    }
+}
+
 function updateNrTests() {
     $.get("./inc/get_tests.php",
       {id: readCookie("session")},
       function(data) {
 	  nrTests = parseInt(data);
-	  alert("Tests: " + data);
+	  updateTestList();
       });
-
 }
 
 
@@ -52,8 +62,8 @@ if (!readCookie("session")) {
 	data = data.substring(1);
 	alert(data);
 	writeCookie("session",data);
-	updateNrTests();
     });
     alert("Wrote cookie!");
     
 }
+updateNrTests();

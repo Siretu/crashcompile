@@ -9,15 +9,15 @@ $stmt = "SELECT party.current_problem, problem.nrTests FROM user INNER JOIN part
 
 $result = mysqli_query($db,$stmt);
 $row = $result->fetch_array(MYSQLI_BOTH);
-echo $row[0];
+/*echo $row[0];
 echo "\r\n";
 echo $row[1];
 echo "\r\n";
-
+*/
 $command = "python ../execution/test_docker.py " . $id . " " . $row[0] . " " . $row[1];
-echo $command;
+//echo $command;
 //$output = exec("ls");
 $output = exec($command);
-echo "\r\n";
+//echo "\r\n";
 echo $output;
 ?>

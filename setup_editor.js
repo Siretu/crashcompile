@@ -20,13 +20,49 @@ function runCode (callback) {
     
 };
 
+function failTest(element) {
+    element.attr("class","list-group-item list-group-item-danger test");
+    var glyph = element.children(":first");
+    glyph.attr("class","glyphicon glyphicon-remove pull-right");
+    glyph.attr("style","color:red");    
+}
+
+function succeedTest(element) {
+    element.attr("class","list-group-item list-group-item-success test");
+    var glyph = element.children(":first");
+    glyph.attr("class","glyphicon glyphicon-ok pull-right");
+    glyph.attr("style","color:green");
+}
+
+function loadingTest(element) {
+    element.attr("class","list-group-item test");
+    var glyph = element.children(":first");
+    glyph.attr("class","glyphicon glyphicon-refresh glyphicon-refresh-animate pull-right");
+    glyph.removeAttr("style");
+}
+
 function testCode (callback) {
     console.log("Testing");
+    console.log(nrTests);
+    for (var i = 0; i < nrTests; i++) { // Hardcoded since nrTests isn't set for some reason
+	var element = $(".test:eq("+i+")")
+	loadingTest(element);
+    }
+
+
     // Add some kind of hashing to see if it has changed since last save?
     $.post("inc/test_code.php",
 	   {id: readCookie("session")},
 	   function(data) {
 	       console.log(data);
+	       for (var i = 0; i < data.length; i++) {
+		   var element = $(".test:eq("+i+")")
+		   if (data[i] == "1") {
+		       succeedTest(element);
+		   } else {
+		       failTest(element);
+		   }
+	       }
 	       callback();
 	   }
 	  );
@@ -74,7 +110,7 @@ editor.commands.addCommand({
 	sender: "editor|cli"
     },
     exec: function() {
-	saveFile(testCode(loadResult));
+	saveFile(testCode());
     }
 });
 
