@@ -2,6 +2,7 @@ function loadResult () {
     console.log("Loading");
     // add error checking ?
     $.get("inc/read_result.php",
+	  {id: readCookie("session")},
 	  function (data) {
 	      result.setValue(data,1);
 	  });
@@ -14,7 +15,9 @@ function runCode (callback) {
 	   {id: readCookie("session")},
 	   function(data) {
 	       console.log(data);
-	       callback();
+	       if (callback) {
+		   callback();
+	       }
 	   }
 	  );
     
@@ -63,7 +66,9 @@ function testCode (callback) {
 		       failTest(element);
 		   }
 	       }
-	       callback();
+	       if (callback) {
+		   callback();
+	       }
 	   }
 	  );
     

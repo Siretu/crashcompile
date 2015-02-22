@@ -56,14 +56,26 @@ function updateNrTests() {
       });
 }
 
-
-if (!readCookie("session")) {
-    $.post("./inc/new_session.php", function(data) {
-	data = data.substring(1);
-	alert(data);
-	writeCookie("session",data);
+$(document).ready(function() {
+    if (!readCookie("session")) {
+	$.post("./inc/new_session.php", function(data) {
+	    data = data.substring(1);
+	    alert(data);
+	    writeCookie("session",data);
+	    updateNrTests();
+	});
+	alert("Wrote cookie!");
+	
+    } else {
+	updateNrTests();
+    }
+    $("#probdesc").popover({
+	html : true,
+	title : function () {
+	    return $("#probdesc-head").html();
+	},
+	content : function () {
+	    return $("#probdesc-content").html();
+	},
     });
-    alert("Wrote cookie!");
-    
-}
-updateNrTests();
+});

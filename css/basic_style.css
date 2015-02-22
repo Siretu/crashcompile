@@ -1,5 +1,4 @@
 body {
-  background-image: url(/images/site/content/kattis_grain.png); 
   background-repeat: repeat-x repeat-y; 
   font-family: "proxima-nova", "Proxima Nova", 'Open Sans', "Helvetice Neue", sans-serif, arial;
   -webkit-font-smoothing: antialiased;
@@ -7,7 +6,7 @@ body {
 
 .wrap {
   width: 100%;
-  max-width: 1140px;
+  max-width: 1340px;
   margin: 0 auto;
   position: relative; }
 
