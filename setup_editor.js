@@ -30,31 +30,18 @@ function failTest(element) {
     glyph.attr("style","color:red");    
 }
 
-function succeedTest(element) {
-    element.attr("class","list-group-item list-group-item-success test");
-    var glyph = element.children(":first");
-    glyph.attr("class","glyphicon glyphicon-ok pull-right");
-    glyph.attr("style","color:green");
-}
 
-function loadingTest(element) {
-    element.attr("class","list-group-item test");
-    var glyph = element.children(":first");
-    glyph.attr("class","glyphicon glyphicon-refresh glyphicon-refresh-animate pull-right");
-    glyph.removeAttr("style");
-}
-
-function testCode (callback) {
+function testCode () {
     console.log("Testing");
-    console.log(nrTests);
     for (var i = 0; i < nrTests; i++) {
 	var element = $(".test:eq("+i+")")
 	loadingTest(element);
     }
-
+    var message = {event: "test", data: editor.getSession().getValue(), id: readCookie("session")};
+    ws.send(JSON.stringify(message));
 
     // Add some kind of hashing to see if it has changed since last save?
-    $.post("inc/test_code.php",
+    /*$.post("inc/test_code.php",
 	   {id: readCookie("session")},
 	   function(data) {
 	       console.log(data);
@@ -70,7 +57,7 @@ function testCode (callback) {
 		   callback();
 	       }
 	   }
-	  );
+	  );*/
     
 };
 
@@ -117,9 +104,7 @@ editor.commands.addCommand({
 	sender: "editor|cli"
     },
     exec: function() {
-	var message = {event: "test", data: editor.getSession().getValue(), id: readCookie("session")};
-	ws.send(JSON.stringify(message));
-	//saveFile(testCode());
+	testCode();
     }
 });
 

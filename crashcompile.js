@@ -6,6 +6,19 @@ var guid = function() { // Deprecated. UUID is now generated server-side.
     });
 }
 
+function succeedTest(element) {
+    element.attr("class","list-group-item list-group-item-success test");
+    var glyph = element.children(":first");
+    glyph.attr("class","glyphicon glyphicon-ok pull-right");
+    glyph.attr("style","color:green");
+}
+
+function loadingTest(element) {
+    element.attr("class","list-group-item test");
+    var glyph = element.children(":first");
+    glyph.attr("class","glyphicon glyphicon-refresh glyphicon-refresh-animate pull-right");
+    glyph.removeAttr("style");
+}
 
 
 function writeCookie(name, value, days) {
@@ -60,6 +73,17 @@ function messageResult(data) {
     result.setValue(data)
 }
 
+function testResult(data) {
+    var i = data.testid - 1;
+    var element = $(".test:eq("+i+")");
+    if (data.data == "0") {
+	failTest(element);
+    } else {
+	succeedTest(element);
+    }
+
+}
+
 $(document).ready(function() {
     ws.onopen = function() {
 	function schedule(i) {
@@ -72,8 +96,15 @@ $(document).ready(function() {
     };
     ws.onmessage = function(data) {
 	var message = JSON.parse(data.data);
-	if (message.event == "result") {
-	    messageResult(message.data);
+	console.log("Got message: " + data.data);
+	if (message.id == readCookie("session")) {
+	    if (message.event == "result") {
+		messageResult(message.data);
+	    } else if (message.event == "testresult") {
+		testResult(message);
+	    }
+	} else {
+	    console.log("ID mismatch");
 	}
     };
     if (!readCookie("session")) {
