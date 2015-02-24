@@ -2,6 +2,7 @@ import os
 import sys
 import json
 import MySQLdb
+import threading
 from config import *
 
 import tornado.ioloop
@@ -61,6 +62,7 @@ class MainHandler(tornado.websocket.WebSocketHandler):
         save_code(js["data"], js["id"])
         result = get_user_info(js["id"])[0]
         self.run_tests(js,result)
+                                                        
         
     def run_tests(self,js,result):
         uid = js["id"]
@@ -68,19 +70,25 @@ class MainHandler(tornado.websocket.WebSocketHandler):
         nrTests = int(result[1])
         partyid = int(result[2])
         for x in range(1,nrTests+1):
-            print "Running test %d-%d" % (problemid,x)
-            cmd = "docker run -v /var/www/crashcompile/execution/%s.txt:/student.py -v /var/www/crashcompile/tests/%d/in%d:/test.txt student_test >/var/www/crashcompile/execution/results_%s.txt 2>&1" % (uid,problemid,x,uid)
-            os.system(cmd)
-            cmd2 = "diff /var/www/crashcompile/tests/%d/out%d /var/www/crashcompile/execution/results_%s.txt" % (problemid,x,uid)
-            diff = os.popen(cmd2)
-            output = diff.read()
-            print "Got diff: " + str(output)
-            result = {"event": "testresult","testid":x, "id": uid}
-            if not output:
-                result["data"] = 1
-            else:
-                result["data"] = 0
-            self.write_message(json.dumps(result))
+            t = threading.Thread(target=self.test,args=(uid,problemid,partyid,x))
+            t.start()
+            #self.test(uid,problemid,partyid,x)
+
+    def test(self, uid, problemid, partyid, x):
+        print "Running test %d-%d" % (problemid,x)
+        cmd = "docker run -v /var/www/crashcompile/execution/%s.txt:/student.py -v /var/www/crashcompile/tests/%d/in%d:/test.txt student_test >/var/www/crashcompile/execution/results_%s_%d.txt 2>&1" % (uid,problemid,x,uid,x)
+        os.system(cmd)
+        cmd2 = "diff /var/www/crashcompile/tests/%d/out%d /var/www/crashcompile/execution/results_%s_%d.txt" % (problemid,x,uid,x)
+        diff = os.popen(cmd2)
+        output = diff.read()
+        print "Got diff: " + str(output)
+        result = {"event": "testresult","testid":x, "id": uid}
+        if not output:
+            result["data"] = 1
+        else:
+            result["data"] = 0
+        self.write_message(json.dumps(result))
+    
 
     def initProblemDesc(self,js):
         print "initing"
