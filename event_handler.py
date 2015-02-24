@@ -21,9 +21,15 @@ def read_result(uid):
     with open("execution/results_%s.txt" % uid) as myfile:
         return myfile.read()
 
+def get_user_info(uid):
+    cur.execute("SELECT party.current_problem, problem.nrTests, party.id FROM user INNER JOIN party ON user.party_id = party.id INNER JOIN problem ON party.current_problem = problem.id WHERE user.session_id = X'%s'" % uid)
+    result = cur.fetchall()
+    return result
+
+
 class MainHandler(tornado.websocket.WebSocketHandler):
     def open(self):
-        message = {"event":"result","data":"This is the result"}
+        message = {"event":"init"}
         self.write_message(json.dumps(message))
 
     def check_origin(self, origin):
@@ -37,6 +43,8 @@ class MainHandler(tornado.websocket.WebSocketHandler):
             self.run_code(js)
         elif js["event"] == "test":
             self.test_code(js)
+        elif js["event"] == "init":
+            self.initProblemDesc(js)
 
     def on_close(self):
         pass
@@ -51,9 +59,7 @@ class MainHandler(tornado.websocket.WebSocketHandler):
 
     def test_code(self,js):
         save_code(js["data"], js["id"])
-        cur.execute("SELECT party.current_problem, problem.nrTests, party.id FROM user INNER JOIN party ON user.party_id = party.id INNER JOIN problem ON party.current_problem = problem.id WHERE user.session_id = X'%s'" % js["id"])
-        result = cur.fetchall()[0]
-        print result
+        result = get_user_info(js["id"])[0]
         self.run_tests(js,result)
         
     def run_tests(self,js,result):
@@ -75,6 +81,18 @@ class MainHandler(tornado.websocket.WebSocketHandler):
             else:
                 result["data"] = 0
             self.write_message(json.dumps(result))
+
+    def initProblemDesc(self,js):
+        print "initing"
+        result = [int(x) for x in get_user_info(js["id"])[0]]
+        print result
+        head = content = ""
+        with open("/var/www/crashcompile/tests/%d/content.html" % result[0]) as myfile:
+            content = myfile.read()
+        with open("/var/www/crashcompile/tests/%d/head.html" % result[0]) as myfile:
+            head = myfile.read()
+        reply = {"event":"desc","id":js["id"],"content":content,"head":head}
+        self.write_message(json.dumps(reply))
 
 
 application = tornado.web.Application([

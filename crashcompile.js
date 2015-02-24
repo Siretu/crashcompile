@@ -81,32 +81,28 @@ function testResult(data) {
     } else {
 	succeedTest(element);
     }
-
 }
 
+function setProblemDesc(data) {
+    console.log("Setting description");
+    console.log(data.head);
+    console.log(data.content);
+    $("#probdesc").popover({
+	html : true,
+	title : function () {
+	    return data.head;
+	},
+	content : function () {
+	    return data.content;
+	},
+    });
+    
+}
+ws.onopen = function() {
+    console.log("foo");
+};
+
 $(document).ready(function() {
-    ws.onopen = function() {
-	function schedule(i) {
-	    setTimeout(function() { 
-		ws.send('Hello from the client! (iteration ' + i + ')');
-		schedule(i + 1);
-	    }, 1000);            
-	};
-	schedule(1);            
-    };
-    ws.onmessage = function(data) {
-	var message = JSON.parse(data.data);
-	console.log("Got message: " + data.data);
-	if (message.id == readCookie("session")) {
-	    if (message.event == "result") {
-		messageResult(message.data);
-	    } else if (message.event == "testresult") {
-		testResult(message);
-	    }
-	} else {
-	    console.log("ID mismatch");
-	}
-    };
     if (!readCookie("session")) {
 	$.post("./inc/new_session.php", function(data) {
 	    data = data.substring(1);
@@ -119,13 +115,25 @@ $(document).ready(function() {
     } else {
 	updateNrTests();
     }
-    $("#probdesc").popover({
-	html : true,
-	title : function () {
-	    return $("#probdesc-head").html();
-	},
-	content : function () {
-	    return $("#probdesc-content").html();
-	},
-    });
+
+    ws.onmessage = function(data) {
+	var message = JSON.parse(data.data);
+	console.log("Got message: " + data.data);
+	if (message.id == readCookie("session") || message.event == "init") {
+	    if (message.event == "result") {
+		messageResult(message.data);
+	    } else if (message.event == "testresult") {
+		testResult(message);
+	    } else if (message.event == "desc"){
+		setProblemDesc(message);
+	    } else if (message.event == "init") {
+		console.log("Got init");
+		var reply = {event: "init", id: readCookie("session")};
+		ws.send(JSON.stringify(reply));
+	    }
+	} else {
+	    console.log("ID mismatch");
+	}
+    };
+    
 });
