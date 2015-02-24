@@ -34,6 +34,8 @@ class MainHandler(tornado.websocket.WebSocketHandler):
         print js["event"]
         if js["event"] == "run":
             self.run_code(js)
+        elif js["event"] == "test":
+            self.test_code(js)
 
     def on_close(self):
         pass
