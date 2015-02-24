@@ -56,7 +56,26 @@ function updateNrTests() {
       });
 }
 
+function messageResult(data) {
+    result.setValue(data)
+}
+
 $(document).ready(function() {
+    ws.onopen = function() {
+	function schedule(i) {
+	    setTimeout(function() { 
+		ws.send('Hello from the client! (iteration ' + i + ')');
+		schedule(i + 1);
+	    }, 1000);            
+	};
+	schedule(1);            
+    };
+    ws.onmessage = function(data) {
+	var message = JSON.parse(data.data);
+	if (message.event == "result") {
+	    messageResult(message.data);
+	}
+    };
     if (!readCookie("session")) {
 	$.post("./inc/new_session.php", function(data) {
 	    data = data.substring(1);

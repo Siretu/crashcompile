@@ -47,7 +47,7 @@ function loadingTest(element) {
 function testCode (callback) {
     console.log("Testing");
     console.log(nrTests);
-    for (var i = 0; i < nrTests; i++) { // Hardcoded since nrTests isn't set for some reason
+    for (var i = 0; i < nrTests; i++) {
 	var element = $(".test:eq("+i+")")
 	loadingTest(element);
     }
@@ -104,7 +104,9 @@ editor.commands.addCommand({
 	sender: "editor|cli"
     },
     exec: function() {
-	saveFile(runCode(loadResult));
+	var message = {event: "run",data: editor.getSession().getValue(), id: readCookie("session")};
+	ws.send(JSON.stringify(message));
+	//saveFile(runCode(loadResult));
     }
 });
 editor.commands.addCommand({
@@ -115,7 +117,9 @@ editor.commands.addCommand({
 	sender: "editor|cli"
     },
     exec: function() {
-	saveFile(testCode());
+	var message = {event: "test", data: editor.getSession().getValue(), id: readCookie("session")};
+	ws.send(JSON.stringify(message));
+	//saveFile(testCode());
     }
 });
 
