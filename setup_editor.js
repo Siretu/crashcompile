@@ -1,4 +1,4 @@
-function loadResult () {
+/*function loadResult () {
     console.log("Loading");
     // add error checking ?
     $.get("inc/read_result.php",
@@ -23,12 +23,16 @@ function runCode (callback) {
     
 };
 
-function failTest(element) {
-    element.attr("class","list-group-item list-group-item-danger test");
-    var glyph = element.children(":first");
-    glyph.attr("class","glyphicon glyphicon-remove pull-right");
-    glyph.attr("style","color:red");    
-}
+function saveFile(callback) {
+    console.log("Saving");
+    var contents = editor.getSession().getValue();
+    $.post("inc/compile.php",
+	   {contents: contents,
+	    id: readCookie("session")},
+	   callback
+	  );
+};
+*/
 
 
 function testCode () {
@@ -39,37 +43,8 @@ function testCode () {
     }
     var message = {event: "test", data: editor.getSession().getValue(), id: readCookie("session")};
     ws.send(JSON.stringify(message));
-
-    // Add some kind of hashing to see if it has changed since last save?
-    /*$.post("inc/test_code.php",
-	   {id: readCookie("session")},
-	   function(data) {
-	       console.log(data);
-	       for (var i = 0; i < data.length; i++) {
-		   var element = $(".test:eq("+i+")")
-		   if (data[i] == "1") {
-		       succeedTest(element);
-		   } else {
-		       failTest(element);
-		   }
-	       }
-	       if (callback) {
-		   callback();
-	       }
-	   }
-	  );*/
-    
 };
 
-function saveFile(callback) {
-    console.log("Saving");
-    var contents = editor.getSession().getValue();
-    $.post("inc/compile.php",
-	   {contents: contents,
-	    id: readCookie("session")},
-	   callback
-	  );
-};
 
 
 var editor = ace.edit("editor");
@@ -81,13 +56,14 @@ editor.on('change', function() {
     editor_div.style.height = 16 * doc.getLength() + 'px';
     editor.resize();
 });
+
 editor.setTheme("ace/theme/textmate");
 editor.getSession().setMode("ace/mode/python");
 editor.commands.addCommand({
     name: "save",
     bindKey: {
 	win: "Ctrl-S",
-	mac: "Command-S",
+	mac: "Ctrl-S",
 	sender: "editor|cli"
     },
     exec: function() {
@@ -100,14 +76,16 @@ editor.commands.addCommand({
     name: "test",
     bindKey: {
 	win: "Ctrl-D",
-	mac: "Command-D",
+	mac: "Ctrl-D",
 	sender: "editor|cli"
     },
     exec: function() {
 	testCode();
     }
 });
-
+$("#editor_box").mousedown(function() {
+    editor.focus();
+});
 
 var result = ace.edit("result");
 result.setTheme("ace/theme/terminal");

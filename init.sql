@@ -26,4 +26,7 @@ create table problem (
        nrTests int
 );
 
-insert into problem values (1, 1);
+insert into problem values (1, 5);
+insert into party values (3, 1);
+
+SET GLOBAL TRANSACTION ISOLATION LEVEL READ COMMITTED

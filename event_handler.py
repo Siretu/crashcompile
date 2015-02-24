@@ -23,8 +23,12 @@ def read_result(uid):
         return myfile.read()
 
 def get_user_info(uid):
-    cur.execute("SELECT party.current_problem, problem.nrTests, party.id FROM user INNER JOIN party ON user.party_id = party.id INNER JOIN problem ON party.current_problem = problem.id WHERE user.session_id = X'%s'" % uid)
+    print "Got USER ID: " + uid
+    query = "SELECT party.current_problem, problem.nrTests, party.id FROM user INNER JOIN party ON user.party_id = party.id INNER JOIN problem ON party.current_problem = problem.id WHERE user.session_id = X%s"
+    print query % uid
+    cur.execute(query,uid)
     result = cur.fetchall()
+    print "Got result: " + str(result)
     return result
 
 
@@ -92,15 +96,18 @@ class MainHandler(tornado.websocket.WebSocketHandler):
 
     def initProblemDesc(self,js):
         print "initing"
-        result = [int(x) for x in get_user_info(js["id"])[0]]
-        print result
-        head = content = ""
-        with open("/var/www/crashcompile/tests/%d/content.html" % result[0]) as myfile:
-            content = myfile.read()
-        with open("/var/www/crashcompile/tests/%d/head.html" % result[0]) as myfile:
-            head = myfile.read()
-        reply = {"event":"desc","id":js["id"],"content":content,"head":head}
-        self.write_message(json.dumps(reply))
+        print "Got id: " + str(js["id"])
+        info = get_user_info(js["id"])
+        if info:
+            result = [int(x) for x in info[0]]
+            print result
+            head = content = ""
+            with open("/var/www/crashcompile/tests/%d/content.html" % result[0]) as myfile:
+                content = myfile.read()
+            with open("/var/www/crashcompile/tests/%d/head.html" % result[0]) as myfile:
+                head = myfile.read()
+                reply = {"event":"desc","id":js["id"],"content":content,"head":head}
+            self.write_message(json.dumps(reply))
 
 
 application = tornado.web.Application([
