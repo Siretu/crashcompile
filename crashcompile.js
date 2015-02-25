@@ -86,6 +86,9 @@ function setProblemDesc(data) {
     console.log("Setting description");
     console.log(data.head);
     console.log(data.content);
+    nrTests = parseInt(data.tests);
+    updateTestList();
+
     $("#probdesc").popover({
 	html : true,
 	title : function () {
@@ -97,41 +100,37 @@ function setProblemDesc(data) {
     });
     
 }
+
+var ws = new WebSocket("ws://"+window.location.hostname+":8888");
+
 ws.onopen = function() {
     console.log("foo");
+    if (!readCookie("session")) {
+	ws.send(JSON.stringify({event:"init",id:""}));
+    } else {
+	ws.send(JSON.stringify({event:"init",id:readCookie("session")}));
+    }
 };
 
 $(document).ready(function() {
-    if (!readCookie("session")) {
-	$.post("./inc/new_session.php", function(data) {
-	    data = data.substring(1);
-	    alert(data);
-	    writeCookie("session",data);
-	    updateNrTests();
-	});
-	alert("Wrote cookie!");
-	
-    } else {
-	updateNrTests();
-    }
 
     ws.onmessage = function(data) {
 	var message = JSON.parse(data.data);
 	console.log("Got message: " + data.data);
-	if (message.id == readCookie("session") || message.event == "init") {
+	if (message.id == readCookie("session")) {
 	    if (message.event == "result") {
 		messageResult(message.data);
 	    } else if (message.event == "testresult") {
 		testResult(message);
-	    } else if (message.event == "desc"){
+	    } else if (message.event == "problemdesc"){
 		setProblemDesc(message);
-	    } else if (message.event == "init") {
-		console.log("Got init");
-		var reply = {event: "init", id: readCookie("session")};
-		ws.send(JSON.stringify(reply));
 	    }
 	} else {
-	    console.log("ID mismatch");
+	    if (message.event == "newid") {
+		writeCookie("session", message.data);
+	    } else {
+		console.log("ID mismatch");
+	    }
 	}
     };
     

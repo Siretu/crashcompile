@@ -3,6 +3,8 @@ import sys
 import json
 import MySQLdb
 import threading
+import uuid
+
 from config import *
 
 import tornado.ioloop
@@ -31,11 +33,16 @@ def get_user_info(uid):
     print "Got result: " + str(result)
     return result
 
+def new_session():
+    uid = str(uuid.uuid4()).replace("-","")
+    query = "INSERT INTO user VALUES (default, X%s, 3, '')"
+    cur.execute(query,uid)
+    return uid
+
 
 class MainHandler(tornado.websocket.WebSocketHandler):
     def open(self):
-        message = {"event":"init"}
-        self.write_message(json.dumps(message))
+        pass
 
     def check_origin(self, origin):
         return True # Potentially bad? should probably fix at some point
@@ -49,6 +56,9 @@ class MainHandler(tornado.websocket.WebSocketHandler):
         elif js["event"] == "test":
             self.test_code(js)
         elif js["event"] == "init":
+            if not js["id"]:
+                js["id"] = new_session()
+                self.write_message(json.dumps({"event":"newid","data":js["id"]}))
             self.initProblemDesc(js)
 
     def on_close(self):
@@ -106,7 +116,7 @@ class MainHandler(tornado.websocket.WebSocketHandler):
                 content = myfile.read()
             with open("/var/www/crashcompile/tests/%d/head.html" % result[0]) as myfile:
                 head = myfile.read()
-                reply = {"event":"desc","id":js["id"],"content":content,"head":head}
+            reply = {"event":"problemdesc","id":js["id"],"content":content,"head":head,"tests":result[1]}
             self.write_message(json.dumps(reply))
 
 
