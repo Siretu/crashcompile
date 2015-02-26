@@ -59,15 +59,6 @@ function updateTestList() {
     }
 }
 
-function updateNrTests() {
-    $.get("./inc/get_tests.php",
-      {id: readCookie("session")},
-      function(data) {
-	  nrTests = parseInt(data);
-	  updateTestList();
-      });
-}
-
 function messageResult(data) {
     result.setValue(data)
 }
