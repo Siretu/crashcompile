@@ -4,6 +4,7 @@ import json
 import MySQLdb
 import threading
 import uuid
+import datetime
 
 from config import *
 
@@ -11,6 +12,13 @@ import tornado.ioloop
 import tornado.web
 import tornado.httpserver
 import tornado.websocket
+
+def log_print(s):
+    message = datetime.datetime.now().isoformat(" ") + " " + str(s)
+    print message
+    with open("server.log","a") as myfile:
+        myfile.write(message+"\n")
+
 
 def save_code(code, uid):
     with open("execution/%s.txt" % uid, "w") as myfile:
@@ -25,12 +33,12 @@ def read_result(uid):
         return myfile.read()
 
 def get_user_info(uid):
-    print "Got USER ID: " + uid
+    log_print("Got USER ID: " + uid)
     query = "SELECT party.current_problem, problem.nrTests, party.id FROM user INNER JOIN party ON user.party_id = party.id INNER JOIN problem ON party.current_problem = problem.id WHERE user.session_id = X%s"
-    print query % uid
+    log_print(query % uid)
     cur.execute(query,uid)
     result = cur.fetchall()
-    print "Got result: " + str(result)
+    log_print("Got result: " + str(result))
     return result
 
 def new_session():
@@ -48,9 +56,9 @@ class MainHandler(tornado.websocket.WebSocketHandler):
         return True # Potentially bad? should probably fix at some point
 
     def on_message(self, message):
-        print message
+        log_print(message)
         js = json.loads(message)
-        print js["event"]
+        log_print(js["event"])
         if js["event"] == "run":
             self.run_code(js)
         elif js["event"] == "test":
@@ -89,13 +97,13 @@ class MainHandler(tornado.websocket.WebSocketHandler):
             #self.test(uid,problemid,partyid,x)
 
     def test(self, uid, problemid, partyid, x):
-        print "Running test %d-%d" % (problemid,x)
+        log_print("Running test %d-%d" % (problemid,x))
         cmd = "docker run -v /var/www/crashcompile/execution/%s.txt:/student.py -v /var/www/crashcompile/tests/%d/in%d:/test.txt student_test >/var/www/crashcompile/execution/results_%s_%d.txt 2>&1" % (uid,problemid,x,uid,x)
         os.system(cmd)
         cmd2 = "diff /var/www/crashcompile/tests/%d/out%d /var/www/crashcompile/execution/results_%s_%d.txt" % (problemid,x,uid,x)
         diff = os.popen(cmd2)
         output = diff.read()
-        print "Got diff: " + str(output)
+        log_print("Got diff: " + str(output))
         result = {"event": "testresult","testid":x, "id": uid}
         if not output:
             result["data"] = 1
@@ -105,12 +113,12 @@ class MainHandler(tornado.websocket.WebSocketHandler):
     
 
     def initProblemDesc(self,js):
-        print "initing"
-        print "Got id: " + str(js["id"])
+        log_print("initing")
+        log_print("Got id: " + str(js["id"]))
         info = get_user_info(js["id"])
         if info:
             result = [int(x) for x in info[0]]
-            print result
+            log_print(result)
             head = content = ""
             with open("/var/www/crashcompile/tests/%d/content.html" % result[0]) as myfile:
                 content = myfile.read()
