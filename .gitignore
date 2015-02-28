@@ -5,3 +5,4 @@ config.ini
 inc/config.ini
 *~
 *.txt
+*.pyc
