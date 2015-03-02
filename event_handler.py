@@ -43,7 +43,9 @@ def get_user_info(uid):
 
 def new_session():
     uid = str(uuid.uuid4()).replace("-","")
+    log_print("Creating new session: " + uid)
     query = "INSERT INTO user VALUES (default, X%s, 3, '')"
+    log_print("Query: " + query % uid)
     cur.execute(query,uid)
     return uid
 
@@ -136,6 +138,7 @@ http_server = tornado.httpserver.HTTPServer(application)
 
 if __name__ == "__main__":
     db = MySQLdb.connect(host=db_host,user=db_user,passwd=db_password,db=db_database)
+    db.get_conn().ping(True)
     db.autocommit(True)
     cur = db.cursor()
     http_server.listen(8888)
