@@ -26,7 +26,7 @@ def save_code(code, uid):
 
 
 def run_docker(uid):
-    os.system("docker run --net none --volume /var/www/crashcompile/execution/%s.txt:/student.py student_test python /student.py >/var/www/crashcompile/execution/results_%s.txt 2>&1" % (uid,uid))
+    os.system("docker run --net none --volume /var/www/crashcompile/execution/%s.txt:/student.py crashcompile python /student.py >/var/www/crashcompile/execution/results_%s.txt 2>&1" % (uid,uid))
     
 def read_result(uid):
     with open("execution/results_%s.txt" % uid) as myfile:
@@ -100,7 +100,7 @@ class MainHandler(tornado.websocket.WebSocketHandler):
 
     def test(self, uid, problemid, partyid, x):
         log_print("Running test %d-%d" % (problemid,x))
-        cmd = "docker run --net none -v /var/www/crashcompile/execution/%s.txt:/student.py -v /var/www/crashcompile/tests/%d/in%d:/test.txt student_test >/var/www/crashcompile/execution/results_%s_%d.txt 2>&1" % (uid,problemid,x,uid,x)
+        cmd = "docker run --net none -v /var/www/crashcompile/execution/%s.txt:/student.py -v /var/www/crashcompile/tests/%d/in%d:/test.txt crashcompile >/var/www/crashcompile/execution/results_%s_%d.txt 2>&1" % (uid,problemid,x,uid,x)
         os.system(cmd)
         cmd2 = "diff /var/www/crashcompile/tests/%d/out%d /var/www/crashcompile/execution/results_%s_%d.txt" % (problemid,x,uid,x)
         diff = os.popen(cmd2)
@@ -138,7 +138,7 @@ http_server = tornado.httpserver.HTTPServer(application)
 
 if __name__ == "__main__":
     db = MySQLdb.connect(host=db_host,user=db_user,passwd=db_password,db=db_database)
-    db.get_conn().ping(True)
+    db.ping(True)
     db.autocommit(True)
     cur = db.cursor()
     http_server.listen(8888)
