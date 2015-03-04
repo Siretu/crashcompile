@@ -12,4 +12,4 @@ USER drone
 
 VOLUME ["/student.py","/test.txt"]
 
-CMD cat /test.txt | python /student.py
+CMD timeout 3 cat /test.txt | python /student.py

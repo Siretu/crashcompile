@@ -26,7 +26,7 @@ def save_code(code, uid):
 
 
 def run_docker(uid):
-    os.system("docker run --net none --volume /var/www/crashcompile/execution/%s.txt:/student.py crashcompile python /student.py >/var/www/crashcompile/execution/results_%s.txt 2>&1" % (uid,uid))
+    os.system("docker run --net none --volume /var/www/crashcompile/execution/%s.txt:/student.py crashcompile timeout 3 python /student.py >/var/www/crashcompile/execution/results_%s.txt 2>&1" % (uid,uid))
     
 def read_result(uid):
     with open("execution/results_%s.txt" % uid) as myfile:
