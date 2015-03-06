@@ -5,6 +5,7 @@ import MySQLdb
 import threading
 import uuid
 import datetime
+import binascii
 
 from config import *
 
@@ -41,6 +42,17 @@ def get_user_info(uid):
     log_print("Got result: " + str(result))
     return result
 
+def get_party_members(uid,party_id = None):
+    log_print("Getting party members")
+    if not party_id:
+        party_id = str(get_user_info(uid)[2])
+    query = "SELECT session_id FROM user WHERE party_id = %s"
+    log_print(query % party_id)
+    cur.execute(query,party_id)
+    result = [binascii.b2a_hex(x[0]) for x in cur.fetchall()]
+    print result
+    return result
+
 def new_session():
     uid = str(uuid.uuid4()).replace("-","")
     log_print("Creating new session: " + uid)
@@ -49,6 +61,8 @@ def new_session():
     cur.execute(query,uid)
     return uid
 
+def partyFail(uid, partyid):
+    get_party_members
 
 class MainHandler(tornado.websocket.WebSocketHandler):
     def open(self):
@@ -111,6 +125,7 @@ class MainHandler(tornado.websocket.WebSocketHandler):
             result["data"] = 1
         else:
             result["data"] = 0
+            partyFail(uid, partyid)
         self.write_message(json.dumps(result))
     
 
@@ -118,6 +133,8 @@ class MainHandler(tornado.websocket.WebSocketHandler):
         log_print("initing")
         log_print("Got id: " + str(js["id"]))
         info = get_user_info(js["id"])
+        print info
+        party_members = get_party_members(js["id"],info[0][2])
         if info:
             result = [int(x) for x in info[0]]
             log_print(result)
@@ -126,7 +143,12 @@ class MainHandler(tornado.websocket.WebSocketHandler):
                 content = myfile.read()
             with open("/var/www/crashcompile/tests/%d/head.html" % result[0]) as myfile:
                 head = myfile.read()
-            reply = {"event":"problemdesc","id":js["id"],"content":content,"head":head,"tests":result[1]}
+            reply = {"event":"problemdesc",
+                     "id":js["id"],
+                     "content":content,
+                     "head":head,
+                     "tests":result[1],
+                     "party":party_members}
             self.write_message(json.dumps(reply))
 
 

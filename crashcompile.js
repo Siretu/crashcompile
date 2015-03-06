@@ -59,6 +59,14 @@ function updateTestList() {
     }
 }
 
+function updatePartyList(party) {
+    var root = $("#party-list");
+    for (var i = 0; i < party.length; i++) {
+	var item = '<li class="list-group-item member">' + party[i] + '</li>';
+	root.append(item);
+    }
+}
+
 function messageResult(data) {
     result.setValue(data)
 }
@@ -78,6 +86,7 @@ function setProblemDesc(data) {
     console.log(data.head);
     console.log(data.content);
     nrTests = parseInt(data.tests);
+    updatePartyList(data.party);
     updateTestList();
 
     $("#probdesc").popover({
