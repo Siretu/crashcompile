@@ -53,18 +53,21 @@ def get_party_members(uid,party_id = None):
     print result
     return result
 
-def new_session():
+def new_session(party_id):
     uid = str(uuid.uuid4()).replace("-","")
     log_print("Creating new session: " + uid)
-    query = "INSERT INTO user VALUES (default, X%s, 3, '')"
-    log_print("Query: " + query % uid)
-    cur.execute(query,uid)
+    query = "INSERT INTO user VALUES (default, X%s, %s, '')"
+    log_print("Query: " + query % (uid, party_id))
+    cur.execute(query,(uid,str(party_id)))
     return uid
 
 def partyFail(uid, partyid):
-    get_party_members
+    pass
 
 class MainHandler(tornado.websocket.WebSocketHandler):
+    connections = {}
+    
+
     def open(self):
         pass
 
@@ -80,9 +83,15 @@ class MainHandler(tornado.websocket.WebSocketHandler):
         elif js["event"] == "test":
             self.test_code(js)
         elif js["event"] == "init":
+            party_id = 3 # Change when parties get implemented
             if not js["id"]:
-                js["id"] = new_session()
+                js["id"] = new_session(party_id)
                 self.write_message(json.dumps({"event":"newid","data":js["id"]}))
+            if party_id in self.connections:
+                self.connections[party_id].add(js["id"])
+            else:
+                self.connections[party_id] = set([js["id"]])
+            print self.connections
             self.initProblemDesc(js)
 
     def on_close(self):
@@ -100,13 +109,14 @@ class MainHandler(tornado.websocket.WebSocketHandler):
         save_code(js["data"], js["id"])
         result = get_user_info(js["id"])[0]
         self.run_tests(js,result)
-                                                        
-        
+
+
     def run_tests(self,js,result):
         uid = js["id"]
         problemid = int(result[0])
         nrTests = int(result[1])
         partyid = int(result[2])
+        print self.connections
         for x in range(1,nrTests+1):
             t = threading.Thread(target=self.test,args=(uid,problemid,partyid,x))
             t.start()
@@ -149,7 +159,9 @@ class MainHandler(tornado.websocket.WebSocketHandler):
                      "head":head,
                      "tests":result[1],
                      "party":party_members}
-            self.write_message(json.dumps(reply))
+            mess = json.dumps(reply)
+            log_print("Sending message: %s" % mess)
+            self.write_message(mess)
 
 
 application = tornado.web.Application([

@@ -62,7 +62,7 @@ function updateTestList() {
 function updatePartyList(party) {
     var root = $("#party-list");
     for (var i = 0; i < party.length; i++) {
-	var item = '<li class="list-group-item member">' + party[i] + '</li>';
+	var item = '<li class="list-group-item member">' + party[i].slice(0,7) + '</li>';
 	root.append(item);
     }
 }
@@ -101,20 +101,23 @@ function setProblemDesc(data) {
     
 }
 
-var ws = new WebSocket("ws://"+window.location.hostname+":8888");
-
-ws.onopen = function() {
-    console.log("foo");
-    if (!readCookie("session")) {
-	ws.send(JSON.stringify({event:"init",id:""}));
-    } else {
-	ws.send(JSON.stringify({event:"init",id:readCookie("session")}));
-    }
-};
 
 $(document).ready(function() {
+    var ws = new WebSocket("ws://"+window.location.hostname+":8888");
+    
+    ws.onopen = function() {
+	console.log("foo");
+	if (!readCookie("session")) {
+	    console.log("Sent no id");
+	    ws.send(JSON.stringify({event:"init",id:""}));
+	} else {
+	    console.log("Sent id: " + readCookie("session"));
+	    ws.send(JSON.stringify({event:"init",id:readCookie("session")}));
+	}
+    };
 
     ws.onmessage = function(data) {
+	console.log("Got A message");
 	var message = JSON.parse(data.data);
 	console.log("Got message: " + data.data);
 	if (message.id == readCookie("session")) {
@@ -129,7 +132,7 @@ $(document).ready(function() {
 	    if (message.event == "newid") {
 		writeCookie("session", message.data);
 	    } else {
-		console.log("ID mismatch");
+		console.log("ID mismatch: " + message.id + " != " + readCookie("session"));
 	    }
 	}
     };
