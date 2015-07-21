@@ -146,6 +146,7 @@ class MainHandler(tornado.websocket.WebSocketHandler):
         print info
         party_members = get_party_members(js["id"],info[0][2])
         if info:
+            log_print("User info acquired")
             result = [int(x) for x in info[0]]
             log_print(result)
             head = content = ""
@@ -162,6 +163,8 @@ class MainHandler(tornado.websocket.WebSocketHandler):
             mess = json.dumps(reply)
             log_print("Sending message: %s" % mess)
             self.write_message(mess)
+        else:
+            log_print('Failed to acquire user info: "%s"' % str(info))
 
 
 application = tornado.web.Application([

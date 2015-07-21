@@ -101,9 +101,9 @@ function setProblemDesc(data) {
     
 }
 
-
+var ws;
 $(document).ready(function() {
-    var ws = new WebSocket("ws://"+window.location.hostname+":8888");
+    ws = new WebSocket("ws://"+window.location.hostname+":8888");
     
     ws.onopen = function() {
 	console.log("foo");
