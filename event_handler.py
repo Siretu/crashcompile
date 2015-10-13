@@ -125,14 +125,20 @@ class MainHandler(tornado.websocket.WebSocketHandler):
 
     def test(self, uid, problemid, partyid, x):
         log_print("Running test %d-%d" % (problemid,x))
+
         cmd = "docker run --net none -v /var/www/crashcompile/execution/%s.txt:/student.py -v /var/www/crashcompile/tests/%d/in%d:/test.txt crashcompile >/var/www/crashcompile/execution/results_%s_%d.txt 2>&1" % (uid,problemid,x,uid,x)
-        os.system(cmd)
+        docker = os.popen(cmd)
+        status = docker.close()
         cmd2 = "diff /var/www/crashcompile/tests/%d/out%d /var/www/crashcompile/execution/results_%s_%d.txt" % (problemid,x,uid,x)
         diff = os.popen(cmd2)
         output = diff.read()
+        
         log_print("Got diff: " + str(output))
         result = {"event": "testresult","testid":x, "id": uid}
-        if not output:
+        if status: # Exit code > 0
+            print "Program crashed with exit code: %d" % os.WEXITSTATUS(status)
+            result["data"] = 2
+        elif not output:
             result["data"] = 1
         else:
             result["data"] = 0
