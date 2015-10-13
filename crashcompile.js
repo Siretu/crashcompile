@@ -1,15 +1,31 @@
 function succeedTest(element) {
-    element.attr("class","list-group-item list-group-item-success test");
     var glyph = element.children(":first");
+    var tooltip = "Correct answer";
+    element.attr("class","list-group-item list-group-item-success test");
+    element.attr("title",tooltip);
+    glyph.attr("title",tooltip);
     glyph.attr("class","glyphicon glyphicon-ok pull-right");
     glyph.attr("style","color:green");
 }
 
-function failTest(element) {
-    element.attr("class","list-group-item list-group-item-danger test");
+function wrongTest(element) {
     var glyph = element.children(":first");
+    var tooltip = "Wrong answer";
+    element.attr("class","list-group-item list-group-item-warning test");
+    element.attr("title",tooltip);
+    glyph.attr("title",tooltip);
+    glyph.attr("class","glyphicon glyphicon-exclamation-sign pull-right");
+    glyph.attr("style","color:#c8cc02");    
+}
+
+function crashTest(element) {
+    var glyph = element.children(":first");
+    var tooltip = "Problem encountered. Execution crashed";
+    element.attr("class","list-group-item list-group-item-danger test");
+    element.attr("title",tooltip);
+    glyph.attr("title",tooltip);
     glyph.attr("class","glyphicon glyphicon-remove pull-right");
-    glyph.attr("style","color:red");    
+    glyph.attr("style","color:red");
 }
 
 function loadingTest(element) {
@@ -75,9 +91,11 @@ function testResult(data) {
     var i = data.testid - 1;
     var element = $(".test:eq("+i+")");
     if (data.data == "0") {
-	failTest(element);
-    } else {
+	wrongTest(element);
+    } else if (data.data == "1") {
 	succeedTest(element);
+    } else {
+	crashTest(element);
     }
 }
 
