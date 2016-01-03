@@ -28,7 +28,8 @@ def save_code(code, uid):
 
 
 def run_docker(uid):
-    os.system("docker run --net none --volume /var/www/crashcompile/execution/%s.txt:/student.py crashcompile timeout 3 python /student.py >/var/www/crashcompile/execution/results_%s.txt 2>&1" % (uid,uid))
+    cwd = os.getcwd()
+    os.system("docker run --net none --volume %s/execution/%s.txt:/student.py crashcompile timeout 3 python /student.py >%s/execution/results_%s.txt 2>&1" % (cwd,uid,cwd,uid))
     
 def read_result(uid):
     with open("execution/results_%s.txt" % uid) as myfile:
@@ -70,6 +71,9 @@ class MainHandler(tornado.websocket.WebSocketHandler):
     
 
     def open(self):
+        pass
+
+    def get(self):
         pass
 
     def check_origin(self, origin):
@@ -125,11 +129,11 @@ class MainHandler(tornado.websocket.WebSocketHandler):
 
     def test(self, uid, problemid, partyid, x):
         log_print("Running test %d-%d" % (problemid,x))
-
-        cmd = "docker run --net none -v /var/www/crashcompile/execution/%s.txt:/student.py -v /var/www/crashcompile/tests/%d/in%d:/test.txt crashcompile >/var/www/crashcompile/execution/results_%s_%d.txt 2>&1" % (uid,problemid,x,uid,x)
+        cwd = os.getcwd()
+        cmd = "docker run --net none -v %s/execution/%s.txt:/student.py -v %s/tests/%d/in%d:/test.txt crashcompile >%s/execution/results_%s_%d.txt 2>&1" % (cwd,uid,cwd,problemid,x,cwd,uid,x)
         docker = os.popen(cmd)
         status = docker.close()
-        cmd2 = "diff /var/www/crashcompile/tests/%d/out%d /var/www/crashcompile/execution/results_%s_%d.txt" % (problemid,x,uid,x)
+        cmd2 = "diff %s/tests/%d/out%d %s/execution/results_%s_%d.txt" % (cwd,problemid,x,cwd,uid,x)
         diff = os.popen(cmd2)
         output = diff.read()
         
@@ -149,6 +153,7 @@ class MainHandler(tornado.websocket.WebSocketHandler):
     def initProblemDesc(self,js):
         log_print("initing")
         log_print("Got id: " + str(js["id"]))
+        cwd = os.getcwd()
         info = get_user_info(js["id"])
         print info
         party_members = get_party_members(js["id"],info[0][2])
@@ -157,9 +162,9 @@ class MainHandler(tornado.websocket.WebSocketHandler):
             result = [int(x) for x in info[0]]
             log_print(result)
             head = content = ""
-            with open("/var/www/crashcompile/tests/%d/content.html" % result[0]) as myfile:
+            with open("%s/tests/%d/content.html" % (cwd,result[0])) as myfile:
                 content = myfile.read()
-            with open("/var/www/crashcompile/tests/%d/head.html" % result[0]) as myfile:
+            with open("%s/tests/%d/head.html" % (cwd,result[0])) as myfile:
                 head = myfile.read()
             reply = {"event":"problemdesc",
                      "id":js["id"],
